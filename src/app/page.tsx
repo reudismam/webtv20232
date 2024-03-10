@@ -1,7 +1,8 @@
 'use client'
 
-import { useContext } from "react";
+import { ChangeEvent, useContext } from "react";
 import { HomeContext } from "./context/HomeContext";
+import { FaPlay } from "react-icons/fa";
 
 const Home = () => {
   const {
@@ -9,22 +10,31 @@ const Home = () => {
     isPlaying,
     videoRef,
     canvasRef,
-    configVideoURL,
+    currentTime,
+    totalTime,
+    configVideo,
     playPause,
-    
+    configCurrentTime,
   } = useContext(HomeContext);
 
   return (
     <main className="m-auto bg-[tomato] w-[80%] h-8">
-        <h1 className="text-white font-bold text-lg text-center">Video {videoURL}</h1>
-
+      <div className="w-[640px]">
         <video ref={videoRef} controls src={videoURL} className="hidden"></video>
 
-        <canvas ref={canvasRef} className="w-[464px] h-[256px] bg-[tomato]">
-
+        <canvas ref={canvasRef} className="h-[360px] w-full bg-[tomato]">
         </canvas>
-
-        <button onClick={playPause}>play/pause</button>
+        <div className="bg-[black] w-full h-14">
+          <input className="w-full"
+            type="range"
+            min="0"
+            max={totalTime}
+            value={currentTime}
+            onChange={(e:ChangeEvent<HTMLInputElement>) => configCurrentTime(Number(e.target.value))}
+          />
+          <button className="text-white" onClick={playPause}><FaPlay /></button>
+        </div>
+      </div>
     </main>
   );
 }
