@@ -1,7 +1,8 @@
 "use client"
 
 import { ReactNode, RefObject, createContext, useEffect, useRef, useState } from "react";
-import { PiNumberCircleEightLight } from "react-icons/pi";
+
+import videos from "../data/videos";
 
 type HomeContextData = {
     videoURL: string;
@@ -10,7 +11,7 @@ type HomeContextData = {
     canvasRef: RefObject<HTMLCanvasElement>;
     currentTime: number;
     totalTime: number;
-    configVideo: (url: string) => void;
+    configVideo: (videoIndex: number) => void;
     playPause: () => void;
     configCurrentTime: (time: number) => void;
 }
@@ -26,26 +27,39 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [totalTime, setTotalTime] = useState(0);
+    const [videoIndex, setVideoIndex] = useState(1);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        configVideo("video/video.mp4");
+        configVideo(videoIndex);
     }, []);
 
     useEffect(()=> {
         const video = videoRef.current;
         if (video && videoURL && videoURL.length > 0) {
         video.onloadedmetadata = () => {
-            setTotalTime(video.duration)
+            setCurrentTime(0);
+            setTotalTime(video.duration);
+
+            if (isPlaying) {
+                video.play();
+                draw();
+            }
         }
 
         video.ontimeupdate = () => {
             setCurrentTime(video.currentTime);
+
+            
+        }
+
+        video.onended = () => {
+            configVideo(videoIndex + 1);
         }
 
        }
-    }, [videoURL, currentTime]);
+    }, [videoURL, currentTime, videoIndex]);
 
     const playPause = () => {
         const video = videoRef.current;
@@ -80,8 +94,11 @@ const HomeContextProvider = ({children}: ProviderProps) => {
         requestAnimationFrame(draw);
     }
 
-    const configVideo = (url:string) => {
-        setVideoURL(url);
+    const configVideo = (videoIndex: number) => {
+        const nextIndex = videoIndex % videos.length;
+        const nextVideoURL = videos[nextIndex].videoURL;
+        setVideoIndex(nextIndex);
+        setVideoURL(nextVideoURL);
     }
 
     return (
